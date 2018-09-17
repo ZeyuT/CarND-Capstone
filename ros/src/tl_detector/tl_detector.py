@@ -157,7 +157,6 @@ class TLDetector(object):
 
         # if we have found a closest light to monitor, then determine the stop line position of this light
         if closest_light:
-            self.process_count += 1
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
