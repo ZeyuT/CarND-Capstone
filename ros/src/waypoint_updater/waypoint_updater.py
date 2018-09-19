@@ -39,6 +39,8 @@ class WaypointUpdater(object):
         self.waypoint_tree = None
 	
 	self.getdata = False;
+	
+	self.last_final_lane = None
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb, queue_size=1)
@@ -51,7 +53,7 @@ class WaypointUpdater(object):
     def loop(self):
         rate = rospy.Rate(50)
         while not rospy.is_shutdown():
-            if self.pose and self.base_lane and self.getdata:
+            if self.pose and self.base_lane:
                 self.publish_waypoints()
             rate.sleep()
 
@@ -83,8 +85,18 @@ class WaypointUpdater(object):
         self.final_waypoints_pub.publish(lane)
     """
     def publish_waypoints(self):
-        final_lane = self.generate_lane()
-        self.final_waypoints_pub.publish(final_lane)
+
+        # If get /traffic_waypoint message, then calulate lane points in current step
+	if self.getdata:
+	    final_lane = self.generate_lane()
+	    self.last_final_lane = final_lane
+            self.final_waypoints_pub.publish(final_lane)
+
+	#If loss /traffic_waypoint message, then use last lane calculated with /traffic_waypoint message
+	elif self.last_final_lane == None:
+	    pass;
+	else:
+	    self.final_waypoints_pub.publish(self.last_final_lane)
 
     def generate_lane(self):
         lane = Lane()
