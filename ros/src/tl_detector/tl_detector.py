@@ -17,7 +17,7 @@ import os
 
 STATE_COUNT_THRESHOLD = 10
 
-RED_THRESHOLD = 100
+RED_THRESHOLD = 150 
 
 class TLDetector(object):
     def __init__(self):
@@ -73,6 +73,7 @@ class TLDetector(object):
 
         """
         self.has_image = True
+	print("got image")
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
 
