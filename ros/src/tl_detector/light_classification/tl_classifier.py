@@ -11,7 +11,7 @@ from io import StringIO
 from matplotlib import pyplot as plt
 from glob import glob
 import sys
-from object_detection.utils import dataset_util
+
 
 class TLClassifier(object):
     def __init__(self):
@@ -32,6 +32,7 @@ class TLClassifier(object):
                 tf.import_graph_def(od_graph_def, name='')
             
             self.sess = tf.Session(graph = self.detection_graph, config =  config)
+
             self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
 	
             self.detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
@@ -40,8 +41,8 @@ class TLClassifier(object):
             self.num_detections =self.detection_graph.get_tensor_by_name('num_detections:0')
         
         
-    def load_image_into_numpy_array(image):
-        (im_width, im_height) = image.size
+    def load_image_into_numpy_array(self,image):
+        (im_width, im_height,im_depth) = image.shape
         return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
     
     # Helper function to convert normalized box coordinates to pixels
@@ -50,7 +51,7 @@ class TLClassifier(object):
         box_pixel = [int(box[0]*height), int(box[1]*width), int(box[2]*height), int(box[3]*width)]
         return np.array(box_pixel)      
 
-    def get_classification(self, image):
+    def get_classification(self, image, RED_THRESHOLD):
         """Determines the color of the traffic light in the image
 
         Args:
@@ -106,7 +107,7 @@ class TLClassifier(object):
                         red_count += 1
             
 	    print('red count:',red_count)
-            if red_count > 100:
+            if red_count > RED_THRESHOLD:
                 return TrafficLight.RED
 		print ('detect red light')
             
