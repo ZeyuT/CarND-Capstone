@@ -71,9 +71,8 @@ class TLClassifier(object):
         detection_boxes=np.squeeze(detection_boxes)
         detection_classes =np.squeeze(detection_classes)
         detection_scores = np.squeeze(detection_scores)
-        
-        idx_vec = [i for i, v in enumerate(detection_classes.tolist()) if ((v == 10.) and (detection_scores[i] > 0.3))]
-        
+
+        idx_vec = [i for i, v in enumerate(detection_classes.tolist()) if ((v == 10.) and (detection_scores[i] > 0.15))]
         true_box = [];
         if not (len(idx_vec) ==0):
             for idx in idx_vec:
@@ -83,7 +82,7 @@ class TLClassifier(object):
                 box_w = box[3] - box[1]
                 
                 #Consider boxes smaller than 20 pixels to be false positive
-                if ((box_h>20) and (box_w>20)):
+                if ((box_h>30) and (box_w>30)):
                     
                     #Only consider the first true detection
                     true_box = box
@@ -106,9 +105,8 @@ class TLClassifier(object):
                     if((pixel[0] > 160 and pixel[0] < 180) or (pixel[0] > 0 and pixel[0] < 8)):
                         red_count += 1
             
-	    print('red count:',red_count)
+	    print("red count:",red_count)
             if red_count > RED_THRESHOLD:
                 return TrafficLight.RED
-		print ('detect red light')
             
         return TrafficLight.UNKNOWN
