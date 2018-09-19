@@ -9,11 +9,15 @@ from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
+import numpy as np
 import yaml
+
 from scipy.spatial import KDTree
+import os
 
+STATE_COUNT_THRESHOLD = 10
 
-STATE_COUNT_THRESHOLD = 3
+RED_THRESHOLD = 100
 
 class TLDetector(object):
     def __init__(self):
@@ -26,6 +30,10 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
 
+        self.bridge = CvBridge()
+        self.light_classifier = TLClassifier()
+
+        self.listener = tf.TransformListener()
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
@@ -34,11 +42,7 @@ class TLDetector(object):
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
 
-        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
-
-        self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
-        self.listener = tf.TransformListener()
+        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=3)
 
         self.state = TrafficLight.UNKNOWN
         self.last_state = TrafficLight.UNKNOWN
@@ -120,7 +124,7 @@ class TLDetector(object):
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         #Get classification
-        return self.light_classifier.get_classification(cv_image)
+        return self.light_classifier.get_classification(cv_image,RED_THRESHOLD)
 
 #        # For testing in the simulator
 #        return light.state
