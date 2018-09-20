@@ -51,7 +51,7 @@ class TLClassifier(object):
         box_pixel = [int(box[0]*height), int(box[1]*width), int(box[2]*height), int(box[3]*width)]
         return np.array(box_pixel)      
 
-    def get_classification(self, image, RED_THRESHOLD):
+    def get_classification(self, image, RED_THRESHOLD,SCORE_THRESHOLD):
         """Determines the color of the traffic light in the image
 
         Args:
@@ -71,26 +71,32 @@ class TLClassifier(object):
         detection_boxes=np.squeeze(detection_boxes)
         detection_classes =np.squeeze(detection_classes)
         detection_scores = np.squeeze(detection_scores)
+	
+	# height and width of box of true detection should be as least 30 pixels. Normaliz threshold to 0~1
+	box_height_threshold = 30/image.shape[0]
+	box_width_threshold = 30/image.shape[1]		
+        idx_vec = [i for i, v in enumerate(detection_classes.tolist()) if ((v == 10.) and 
+			(detection_boxes[i][2] - detection_boxes[i][0] > box_height_threshold) and
+			(detection_boxes[i][3] - detection_boxes[i][1] > box_width_threshold))]
 
-        idx_vec = [i for i, v in enumerate(detection_classes.tolist()) if ((v == 10.) and (detection_scores[i] > 0.15))]
         true_box = [];
+	max_score = 0.0;
+
+	# find the detection with the max score
         if not (len(idx_vec) ==0):
             for idx in idx_vec:
-                dim = image.shape[0:2]
-                box = self.box_normal_to_pixel(detection_boxes[idx], dim)
-                box_h = box[2] - box[0]
-                box_w = box[3] - box[1]
-                
-                #Consider boxes smaller than 20 pixels to be false positive
-                if ((box_h>30) and (box_w>30)):
-                    
-                    #Only consider the first true detection
-                    true_box = box
-                    break;
+  		if detection_scores[idx] > max_score:
+		    max_score = detection_scores[idx]
+		    max_score_idx = idx
+	    
+	    print('max score: {}'.format(detection_scores[max_score_idx]))
+	    # Only consider the detection with score larger than SCORE_THRESHOLD
+	    if detection_scores[max_score_idx] > SCORE_THRESHOLD:
+                true_box = self.box_normal_to_pixel(detection_boxes[max_score_idx], image.shape[0:2])
         
         # Identify light color
         red_count = 0;
-
+	
         if len(true_box):
             # crop the input image       
             resize_img = cv2.resize(image[true_box[0]:true_box[2], true_box[1]:true_box[3]], (32, 32))
