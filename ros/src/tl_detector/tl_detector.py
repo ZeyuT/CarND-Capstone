@@ -17,7 +17,9 @@ import os
 
 STATE_COUNT_THRESHOLD = 10
 
-RED_THRESHOLD = 150 
+RED_THRESHOLD = 200
+
+SCORE_THRESHOLD = 0.12
 
 class TLDetector(object):
     def __init__(self):
@@ -125,7 +127,7 @@ class TLDetector(object):
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         #Get classification
-        return self.light_classifier.get_classification(cv_image,RED_THRESHOLD)
+        return self.light_classifier.get_classification(cv_image,RED_THRESHOLD,SCORE_THRESHOLD)
 
 #        # For testing in the simulator
 #        return light.state
