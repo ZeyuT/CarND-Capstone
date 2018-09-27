@@ -128,12 +128,13 @@ class TLDetector(object):
             return TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-	#Uncomment to save images from camera.
-	cv2.imwrite(cv2.imwrite('./camera_image/{}.jpg'.format(self.img_count),cv_image))
-	self.img_count += 1
-        #Get classification
+	# Uncomment to save images from camera.
+	# cv2.imwrite(cv2.imwrite('./camera_image/{}.jpg'.format(self.img_count),cv_image))
+	# self.img_count += 1
+	
+        # Get classification
 	classification = self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD)
-	#If detected red light last step, then consider the light as red until the true detection is green.	
+	# If detected red light last step, then consider the light as red until the true detection is green.	
 	if self.classification == TrafficLight.RED and classification == TrafficLight.UNKNOWN:
 	    self.classification = TrafficLight.RED
 	    return TrafficLight.RED
