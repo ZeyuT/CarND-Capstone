@@ -12,12 +12,17 @@ from matplotlib import pyplot as plt
 from glob import glob
 import sys
 
+# Uncomment if need visualization detection
+#import visualization_utils as vis_util
+
+
 
 class TLClassifier(object):
     def __init__(self):
         MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
         PATH_TO_FROZEN_GRAPH = 'light_classification/'+MODEL_NAME+ '/frozen_inference_graph.pb'
 
+	self.number = 0
 	# configuration for possible GPU use
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
@@ -51,7 +56,7 @@ class TLClassifier(object):
         box_pixel = [int(box[0]*height), int(box[1]*width), int(box[2]*height), int(box[3]*width)]
         return np.array(box_pixel)      
 
-    def get_classification(self, image, RED_THRESHOLD,SCORE_THRESHOLD):
+    def get_classification(self, image,COLOR_THRESHOLD,SCORE_THRESHOLD):
         """Determines the color of the traffic light in the image
 
         Args:
@@ -71,6 +76,34 @@ class TLClassifier(object):
         detection_boxes=np.squeeze(detection_boxes)
         detection_classes =np.squeeze(detection_classes)
         detection_scores = np.squeeze(detection_scores)
+	
+	"""
+	## Visualize the detection output and save in 'detected' file##
+
+	# Only show detection of traffic lights
+	show_classes = []
+	show_boxes = []
+	show_scores = []
+	for idx in range(0,len(detection_classes)):
+	    if detection_classes[idx] == 10:
+		show_classes.append(10)
+		show_boxes.append(detection_boxes[idx])
+		show_scores.append(detection_scores[idx])
+
+
+	category_index = {10:{'name': 'traffic light','id':10}}	
+	vis_util.visualize_boxes_and_labels_on_image_array(
+	image,
+	np.array(show_boxes),
+	np.array(show_classes),
+	np.array(show_scores),
+	category_index,
+	use_normalized_coordinates=True,min_score_thresh=SCORE_THRESHOLD,
+	line_thickness=3)
+	
+	cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
+	self.number += 1
+	"""
 	
 	# height and width of box of true detection should be as least 30 pixels. Normaliz threshold to 0~1
 	box_height_threshold = 30/image.shape[0]
@@ -95,8 +128,9 @@ class TLClassifier(object):
                 true_box = self.box_normal_to_pixel(detection_boxes[max_score_idx], image.shape[0:2])
         
         # Identify light color
-        red_count = 0;
-	
+        red_count = 0
+	green_count = 0
+
         if len(true_box):
             # crop the input image       
             resize_img = cv2.resize(image[true_box[0]:true_box[2], true_box[1]:true_box[3]], (32, 32))
@@ -110,9 +144,15 @@ class TLClassifier(object):
                 # in hsv space, hue value of red is roughly in 160-180 and 0-8
                     if((pixel[0] > 160 and pixel[0] < 180) or (pixel[0] > 0 and pixel[0] < 8)):
                         red_count += 1
+		# in hsv space, hue value of green is roughly in 35-77
+		    if(pixel[0] > 35 and pixel[0] < 77):
+			green_count += 1
             
-	    print("red count:",red_count)
-            if red_count > RED_THRESHOLD:
-                return TrafficLight.RED
-            
-        return TrafficLight.UNKNOWN
+	    print("red count:",red_count,"green count:",green_count)
+        
+	if red_count > COLOR_THRESHOLD:
+            return TrafficLight.RED
+        elif green_count > COLOR_THRESHOLD:
+	    return TrafficLight.GREEN
+	else:
+            return TrafficLight.UNKNOWN
