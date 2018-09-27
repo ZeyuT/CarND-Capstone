@@ -19,7 +19,7 @@ STATE_COUNT_THRESHOLD = 3
 
 COLOR_THRESHOLD = 250
 
-SCORE_THRESHOLD = 0.1
+SCORE_THRESHOLD = 0.15
 
 class TLDetector(object):
     def __init__(self):
