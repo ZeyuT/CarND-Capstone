@@ -11,15 +11,15 @@ import tf
 import cv2
 import numpy as np
 import yaml
-
+import time
 from scipy.spatial import KDTree
 import os
 
-STATE_COUNT_THRESHOLD = 10
+STATE_COUNT_THRESHOLD = 3
 
-RED_THRESHOLD = 200
+COLOR_THRESHOLD = 250
 
-SCORE_THRESHOLD = 0.12
+SCORE_THRESHOLD = 0.1
 
 class TLDetector(object):
     def __init__(self):
@@ -31,7 +31,7 @@ class TLDetector(object):
         self.waypoint_tree = None
         self.camera_image = None
         self.lights = []
-
+	self.number = 0
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
 
@@ -50,6 +50,8 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
+	self.img_count = 0 
+	self.classification = TrafficLight.UNKNOWN
 
         rospy.spin()
 
@@ -76,7 +78,7 @@ class TLDetector(object):
         """
         self.has_image = True
 	print("got image")
-        self.camera_image = msg
+        self.camera_image = msg	
         light_wp, state = self.process_traffic_lights()
 
         '''
@@ -123,11 +125,21 @@ class TLDetector(object):
 
         if(not self.has_image):
             self.prev_light_loc = None
-            return False
+            return TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+	#Uncomment to save images from camera.
+	cv2.imwrite(cv2.imwrite('./camera_image/{}.jpg'.format(self.img_count),cv_image))
+	self.img_count += 1
         #Get classification
-        return self.light_classifier.get_classification(cv_image,RED_THRESHOLD,SCORE_THRESHOLD)
+	classification = self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD)
+	#If detected red light last step, then consider the light as red until the true detection is green.	
+	if self.classification == TrafficLight.RED and classification == TrafficLight.UNKNOWN:
+	    self.classification = TrafficLight.RED
+	    return TrafficLight.RED
+	else:
+	    self.classification = classification
+	    return classification
 
 #        # For testing in the simulator
 #        return light.state
