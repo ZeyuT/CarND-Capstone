@@ -1,8 +1,43 @@
 
+# System Integration Project
+
 ## Introduction
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. In the project, I built ROS nodes to implement core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. This software system will be tested on Carla (Udacity’s Self Driving Lincoln MKZ) around a test track.
 
 Please use **one** of the two installation options, either native **or** docker installation.
+
+## Implementation
+
+[//]: # (Image References)
+
+[image1]: ./images/final-project-ros-graph.png
+[image2]: ./examples/left_2016_12_01_13_30_48_287.jpg
+[image3]: ./examples/right_2016_12_01_13_30_48_287.jpg
+[image4]: ./examples/left_flip.jpg
+[image5]: ./examples/MSE.png
+[image6]: ./examples/ModelStructure.JPG 
+
+The following is a system architecture diagram showing the ROS nodes and topics used in the project.
+![SystemArchitecture][image1]
+Notes that obstacle detection is not included in the project.
+
+### Perception Subsystem
+
+#### Traffic Light Detection Node
+
+### Planning Subsystem
+
+#### Waypoint Loader Node
+
+#### Waypoint Updater Node
+
+### Control Subsystem 
+
+#### Waypoint Follower Node
+
+#### DBW (Drive-by-Wire) Node
+
+## Environment
 
 ### Native Installation
 
