@@ -15,7 +15,7 @@ import time
 from scipy.spatial import KDTree
 import os
 
-STATE_COUNT_THRESHOLD = 5
+STATE_COUNT_THRESHOLD = 4
 
 COLOR_THRESHOLD = 100
 
