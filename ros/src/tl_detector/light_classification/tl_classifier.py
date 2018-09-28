@@ -150,7 +150,7 @@ class TLClassifier(object):
             
             
 	    print("red count:",red_count)
-            if red_count > RED_THRESHOLD:
+            if red_count > COLOR_THRESHOLD:
                 return TrafficLight.RED
             
         return TrafficLight.UNKNOWN
