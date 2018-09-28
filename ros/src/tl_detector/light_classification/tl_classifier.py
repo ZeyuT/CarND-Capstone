@@ -128,7 +128,7 @@ class TLClassifier(object):
                 true_box = self.box_normal_to_pixel(detection_boxes[max_score_idx], image.shape[0:2])
         
         # Identify light color
-        red_count = 0
+	red_count = 0
 	green_count = 0
 
         if len(true_box):
