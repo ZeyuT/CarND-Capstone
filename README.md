@@ -27,7 +27,7 @@ The subsystem detects external environments through varies of sensors. and publi
 
 #### Traffic Light Detection Node
 
-The node subscribes four types of topics to get massage of camera images, the entire list of waypoints, positions of all traffic lights ahead and their corresponding stop lines, and current vehicle position. Then it executes traffic light classification and publish the upcoming traffic light status and the stop line's position. To avoid measurement noise, new traffic light status can not be published unless detections over the previous 4 successive steps are the same as the new traffic light status. 
+The node subscribes four types of topics to get messages of camera images, the entire list of waypoints, positions of all traffic lights ahead and their corresponding stop lines, and current vehicle position. Then it executes traffic light classification and publishes the upcoming traffic light status and the stop line's location. To avoid measurement noise, new traffic light status can not be published unless detections over the previous 4 successive steps are the same as the new traffic light status. 
 
 The light classification takes place in traffic light classification node(./ros/src/tl_detector/light_classification/tf_classifer.py). It is seperated into two steps: region detection and color recognition.
 
@@ -42,21 +42,21 @@ For color recognition, I simply count pixels of red and green in detected region
 
 ### Planning Subsystem
 
-The subsystem plans the vehicle’s trajectory based on the vehicle’s current position and velocity along with the state of upcoming traffic lights. The subsystem publishs the trajetory to the control subsystem in the form of a list of waypoints.
+The subsystem plans the vehicle’s trajectory based on the vehicle’s current position and velocity along with the state of upcoming traffic lights. The subsystem publishes the trajectory to the control subsystem in the form of a list of waypoints.
 
 #### Waypoint Loader Node
 
-This node is given by Udacity. It is used for loading a CSV file that contains all waypoints along the track and publish them. The loaded CSV file can be switched between simulator and real testing track.
+This node is given by Udacity. It is used for loading a CSV file that contains all waypoints along the track and publishes them. The loaded CSV file can be switched between the simulator and the real testing track.
 
 #### Waypoint Updater Node
 
-This node subscribes to three topics to get the entire list of waypoints, vehicle’s current position and velocity, and the state of upcoming traffic lights and stop lines' position. The node plans a path and publish a list of 50 waypoints to the control subsystem to follow at a rate of 50Hz.
+This node subscribes to three topics to get the entire list of waypoints, vehicle’s current position and velocity, and the state of upcoming traffic lights and stop lines' position. The node plans a path and publishes a list of 50 waypoints to the control subsystem to follow at a rate of 50Hz.
 
-Each time the node calculates the trajectory, if the uncoming traffic light is red and the vehicle get close enough to the traffic light, then the node will plan a trajectory on which the vehicle will decelerate at maximum rate and stop right behind the stopline of the upcoming traffic light. Otherwise, the node will plan trajectories only based on the waypoints list of the track.
+Each time the node calculates the trajectory, if the upcoming traffic light is red and the vehicle gets close enough to the traffic light, then the node will plan a trajectory on which the vehicle will decelerate at the maximum rate and stop right behind the stop line of the upcoming traffic light. Otherwise, the node will plan trajectories only based on the waypoints list of the track.
 
 ### Control Subsystem 
 
-The subsystem publish commands for the vehicle’s steering, throttle, and brakes based on the list of waypoints published by the planning subsystem. Besides, the subsystem can be taken over by human in any time.
+The subsystem publishes commands for the vehicle’s steering, throttle, and brakes based on the list of waypoints published by the planning subsystem. Besides, the subsystem can be taken over by humans at any time.
 
 #### Waypoint Follower Node
 
@@ -64,19 +64,19 @@ The node is given by Udacity.It parses the list of waypoints to follow and publi
 
 #### DBW (Drive-by-Wire) Node
 
-The node subscribes three topics to get target linear and angular velocities, current vehicle velocity and current control mode(manually or autonomously). The node publish steering, throttle, and brakes commands at a rate of 50Hz and therefore has three controllers.
+The node subscribes three topics to get target linear and angular velocities, current vehicle velocity and current control mode(manually or autonomously). The node publishes steering, throttle, and brakes command at a rate of 50Hz and therefore has three controllers.
 
 _Steering controller_
 
-The controller is given by Udacity. It can be used to convert target linear and angular velocity to steering commands, considering vehicle’s steering ratio and wheelbase length.
+The controller is given by Udacity. It can be used to convert target linear and angular velocity to steering commands, considering the vehicle’s steering ratio and wheelbase length.
 
 _Throttle controller_
 
-The controller applies PID control that consider the target linear velocity as the reference and adjust the throttle.
+The controller applies PID control that considers the target linear velocity as the reference and adjusts the throttle.
 
 _Braking controller_
 
-The controller is a simple logic controller. It calculate brake torque (in Nm) based on the deceleration, the vehicle's mass and the wheel radius. The maximum brake torque is 700 Nm, which is the demand to fully stop Carla (Udacity’s Self Driving Lincoln MKZ).
+The controller is a simple logic controller. It calculates brake torque (in Nm) based on the deceleration, the vehicle's mass and the wheel radius. The maximum brake torque is 700 Nm, which is the demand to fully stop Carla (Udacity’s Self Driving Lincoln MKZ).
 
 _Low-pass filter_
 
