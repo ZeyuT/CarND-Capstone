@@ -70,15 +70,15 @@ The node subscribes three topics to get target linear and angular velocities, cu
 
 The controller is given by Udacity. It can be used to convert target linear and angular velocity to steering commands, considering vehicle’s steering ratio and wheelbase length.
 
-## Throttle controller ##
+_Throttle controller_
 
 The controller applies PID control that consider the target linear velocity as the reference and adjust the throttle.
 
-## Braking controller ##
+_Braking controller_
 
 The controller is a simple logic controller. It calculate brake torque (in Nm) based on the deceleration, the vehicle's mass and the wheel radius. The maximum brake torque is 700 Nm, which is the demand to fully stop Carla (Udacity’s Self Driving Lincoln MKZ).
 
-## Low-pass filter ##
+_Low-pass filter_
 
 The current velocity measured from sensors of the simulator is passed through a low-pass filter before being used in controllers above. The low-pass filter can filter out those abnormal velocities and reduce possible jitter from noise in velocity data.
 
