@@ -17,7 +17,7 @@ import os
 
 STATE_COUNT_THRESHOLD = 5
 
-COLOR_THRESHOLD = 120
+COLOR_THRESHOLD = 100
 
 SCORE_THRESHOLD = 0.12
 
@@ -133,6 +133,12 @@ class TLDetector(object):
 	# self.img_count += 1
 	
         # Get classification
+	
+	# Uncomment if use red color detection
+	return self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD)
+
+	# Uncomment if use red and green color detection.
+	"""
 	classification = self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD)
 	# If detected red light last step, then consider the light as red until the true detection is green.	
 	if self.classification == TrafficLight.RED and classification == TrafficLight.UNKNOWN:
@@ -141,6 +147,7 @@ class TLDetector(object):
 	else:
 	    self.classification = classification
 	    return classification
+	"""
 
 #        # For testing in the simulator
 #        return light.state
