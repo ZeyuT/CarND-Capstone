@@ -15,11 +15,11 @@ import time
 from scipy.spatial import KDTree
 import os
 
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 5
 
-COLOR_THRESHOLD = 250
+COLOR_THRESHOLD = 120
 
-SCORE_THRESHOLD = 0.15
+SCORE_THRESHOLD = 0.12
 
 class TLDetector(object):
     def __init__(self):
@@ -180,7 +180,7 @@ class TLDetector(object):
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
-        return -1, TrafficLight.UNKOWN
+        return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
     try:
