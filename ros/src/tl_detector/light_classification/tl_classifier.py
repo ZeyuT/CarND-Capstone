@@ -144,20 +144,26 @@ class TLClassifier(object):
                 # in hsv space, hue value of red is roughly in 160-180 and 0-8
                     if((pixel[0] > 160 and pixel[0] < 180) or (pixel[0] > 0 and pixel[0] < 8)):
                         red_count += 1
-#		# in hsv space, hue value of green is roughly in 35-77
-#		    if(pixel[0] > 35 and pixel[0] < 77):
-#			green_count += 1
-            
-            
+			
+		# Uncomment if need red and green color detection
+		"""
+		# in hsv space, hue value of green is roughly in 35-77
+		    if(pixel[0] > 35 and pixel[0] < 77):
+			green_count += 1
+                """
+            # Uncomment if need only red color detection
 	    print("red count:",red_count)
             if red_count > COLOR_THRESHOLD:
                 return TrafficLight.RED
             
         return TrafficLight.UNKNOWN
 
-#	if red_count > COLOR_THRESHOLD:
-#            return TrafficLight.RED
-#        elif green_count > COLOR_THRESHOLD:
-#	    return TrafficLight.GREEN
-#	else:
-#            return TrafficLight.UNKNOWN
+	# Uncomment if need red and green color detection
+	"""
+ 	if red_count > COLOR_THRESHOLD:
+             return TrafficLight.RED
+         elif green_count > COLOR_THRESHOLD:
+ 	    return TrafficLight.GREEN
+ 	else:
+             return TrafficLight.UNKNOWN
+	"""
