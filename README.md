@@ -66,7 +66,7 @@ The node is given by Udacity.It parses the list of waypoints to follow and publi
 
 The node subscribes three topics to get target linear and angular velocities, current vehicle velocity and current control mode(manually or autonomously). The node publish steering, throttle, and brakes commands at a rate of 50Hz and therefore has three controllers.
 
-## Steering controller ##
+_Steering controller_
 
 The controller is given by Udacity. It can be used to convert target linear and angular velocity to steering commands, considering vehicle’s steering ratio and wheelbase length.
 
