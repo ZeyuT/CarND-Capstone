@@ -4,8 +4,6 @@
 ## Introduction
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. In the project, I built ROS nodes to implement core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. This software system will be tested on Carla (Udacity’s Self Driving Lincoln MKZ) around a test track.
 
-Please use **one** of the two installation options, either native **or** docker installation.
-
 ## Implementation
 
 [//]: # (Image References)
@@ -83,6 +81,8 @@ _Low-pass filter_
 The current velocity measured from sensors of the simulator is passed through a low-pass filter before being used in controllers above. The low-pass filter can filter out those abnormal velocities and reduce possible jitter from noise in velocity data.
 
 ## Environment
+
+Please use **one** of the two installation options, either native **or** docker installation.
 
 ### Native Installation
 
