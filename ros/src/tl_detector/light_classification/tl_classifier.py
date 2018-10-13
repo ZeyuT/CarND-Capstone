@@ -13,7 +13,7 @@ from glob import glob
 import sys
 
 # Uncomment if need visualization detection
-#import visualization_utils as vis_util
+import visualization_utils as vis_util
 
 
 
@@ -56,6 +56,21 @@ class TLClassifier(object):
         box_pixel = [int(box[0]*height), int(box[1]*width), int(box[2]*height), int(box[3]*width)]
         return np.array(box_pixel)      
 
+	'''
+    # Gamma transform.
+    def gamma_trans(self, img, gamma):
+	gamma_table = [np.power(x/255.0,gamma) * 255.0 for x in range(256)]
+	gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
+	return cv2.LUT(img,gamma_table)
+    
+    # Adjust contrast and brightness
+    def contrast_brightness(self,img, a, g):
+        h, w, ch = img.shape
+        temp = np.zeros([h, w, ch], img.dtype)
+	dst = cv2.addWeighted(img, a, temp, 1-a, g)
+	return dst
+	'''
+
     def get_classification(self, image,COLOR_THRESHOLD,SCORE_THRESHOLD):
         """Determines the color of the traffic light in the image
 
@@ -66,6 +81,7 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+	# image = self.contrast_brightness(image,0.8,0)
         # Run inference
         with self.detection_graph.as_default():
              (detection_boxes, detection_scores, detection_classes, num_detections) = self.sess.run(
@@ -77,7 +93,7 @@ class TLClassifier(object):
         detection_classes =np.squeeze(detection_classes)
         detection_scores = np.squeeze(detection_scores)
 	
-	"""
+	
 	## Visualize the detection output and save in 'detected' file##
 
 	# Only show detection of traffic lights
@@ -103,7 +119,7 @@ class TLClassifier(object):
 	
 	cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
 	self.number += 1
-	"""
+	
 	
 	# height and width of box of true detection should be as least 30 pixels. Normaliz threshold to 0~1
 	box_height_threshold = 30/image.shape[0]
