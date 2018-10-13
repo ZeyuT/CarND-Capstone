@@ -15,9 +15,9 @@ import time
 from scipy.spatial import KDTree
 import os
 
-STATE_COUNT_THRESHOLD = 6
+STATE_COUNT_THRESHOLD = 3
 
-COLOR_THRESHOLD = 100
+COLOR_THRESHOLD = 55
 
 SCORE_THRESHOLD = 0.12
 
@@ -90,8 +90,8 @@ class TLDetector(object):
         if self.state != state:
             self.state_count = 0
             self.state = state
-        elif self.state_count >= STATE_COUNT_THRESHOLD:
-            self.last_state = self.state
+        elif (self.state_count >= STATE_COUNT_THRESHOLD and self.state == TrafficLight.UNKNOWN) or self.state_count >= (STATE_COUNT_THRESHOLD+4):
+	    self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
             self.upcoming_red_light_pub.publish(Int32(light_wp))
