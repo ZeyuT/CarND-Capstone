@@ -44,11 +44,6 @@ class TLClassifier(object):
             self.detection_scores =self.detection_graph.get_tensor_by_name('detection_scores:0')
             self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
             self.num_detections =self.detection_graph.get_tensor_by_name('num_detections:0')
-        
-        
-    def load_image_into_numpy_array(self,image):
-        (im_width, im_height,im_depth) = image.shape
-        return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
     
     # Helper function to convert normalized box coordinates to pixels
     def box_normal_to_pixel(self, box, dim):
@@ -56,9 +51,19 @@ class TLClassifier(object):
         box_pixel = [int(box[0]*height), int(box[1]*width), int(box[2]*height), int(box[3]*width)]
         return np.array(box_pixel)      
 
-	'''
+	
     # Gamma transform.
     def gamma_trans(self, img, gamma):
+	hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+	h, w, ch = hsv.shape
+ 	mean_saturation = 0
+	for m in range(0,h):
+	   for n in range(0,w):
+		mean_saturation += hsv[m,n][1]
+	mean_saturation = mean_saturation/(h*w)	
+	# Only apply gamma transformation to images with low saturation
+	if mean_saturation > 25:
+	    return img
 	gamma_table = [np.power(x/255.0,gamma) * 255.0 for x in range(256)]
 	gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
 	return cv2.LUT(img,gamma_table)
@@ -69,11 +74,11 @@ class TLClassifier(object):
         temp = np.zeros([h, w, ch], img.dtype)
 	dst = cv2.addWeighted(img, a, temp, 1-a, g)
 	return dst
-	'''
+	
 
-    def get_classification(self, image,COLOR_THRESHOLD,SCORE_THRESHOLD):
+    def get_classification(self, image,COLOR_THRESHOLD,SCORE_THRESHOLD,gamma):
         """Determines the color of the traffic light in the image
-
+c
         Args:
             image (cv::Mat): image containing the traffic light
 
@@ -81,7 +86,7 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-	# image = self.contrast_brightness(image,0.8,0)
+	image = self.gamma_trans(image,gamma)
         # Run inference
         with self.detection_graph.as_default():
              (detection_boxes, detection_scores, detection_classes, num_detections) = self.sess.run(
@@ -92,35 +97,7 @@ class TLClassifier(object):
         detection_boxes=np.squeeze(detection_boxes)
         detection_classes =np.squeeze(detection_classes)
         detection_scores = np.squeeze(detection_scores)
-	
-	
-	## Visualize the detection output and save in 'detected' file##
-
-	# Only show detection of traffic lights
-	show_classes = []
-	show_boxes = []
-	show_scores = []
-	for idx in range(0,len(detection_classes)):
-	    if detection_classes[idx] == 10:
-		show_classes.append(10)
-		show_boxes.append(detection_boxes[idx])
-		show_scores.append(detection_scores[idx])
-
-
-	category_index = {10:{'name': 'traffic light','id':10}}	
-	vis_util.visualize_boxes_and_labels_on_image_array(
-	image,
-	np.array(show_boxes),
-	np.array(show_classes),
-	np.array(show_scores),
-	category_index,
-	use_normalized_coordinates=True,min_score_thresh=SCORE_THRESHOLD,
-	line_thickness=3)
-	
-	cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
-	self.number += 1
-	
-	
+		
 	# height and width of box of true detection should be as least 30 pixels. Normaliz threshold to 0~1
 	box_height_threshold = 30/image.shape[0]
 	box_width_threshold = 30/image.shape[1]		
@@ -167,7 +144,32 @@ class TLClassifier(object):
 		    if(pixel[0] > 35 and pixel[0] < 77):
 			green_count += 1
                 """
-            # Uncomment if need only red color detection
+
+	    ## Visualize the detection output and save in 'detected' file##
+	    # Only show detection of traffic lights
+	    show_classes = []
+	    show_boxes = []
+ 	    show_scores = []
+	    for idx in range(0,len(detection_classes)):
+	        if detection_classes[idx] == 10:
+		    show_classes.append(10)
+		    show_boxes.append(detection_boxes[idx])
+		    show_scores.append(detection_scores[idx])
+
+	    category_index = {10:{'name': 'traffic light','id':10}}	
+	    vis_util.visualize_boxes_and_labels_on_image_array(
+	    image,
+	    np.array(show_boxes),
+	    np.array(show_classes),
+	    np.array(show_scores),
+	    category_index,
+	    use_normalized_coordinates=True,min_score_thresh=SCORE_THRESHOLD,
+	    line_thickness=3)
+	
+	    cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
+	    self.number += 1
+            
+	    # Uncomment if need only red color detection
 	    print("red count:",red_count)
             if red_count > COLOR_THRESHOLD:
                 return TrafficLight.RED
