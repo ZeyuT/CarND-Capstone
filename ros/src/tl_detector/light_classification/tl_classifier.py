@@ -67,14 +67,14 @@ class TLClassifier(object):
 	gamma_table = [np.power(x/255.0,gamma) * 255.0 for x in range(256)]
 	gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
 	return cv2.LUT(img,gamma_table)
-    
+    """
     # Adjust contrast and brightness
     def contrast_brightness(self,img, a, g):
         h, w, ch = img.shape
         temp = np.zeros([h, w, ch], img.dtype)
 	dst = cv2.addWeighted(img, a, temp, 1-a, g)
 	return dst
-	
+    """
 
     def get_classification(self, image,COLOR_THRESHOLD,SCORE_THRESHOLD,gamma):
         """Determines the color of the traffic light in the image
@@ -144,7 +144,7 @@ c
 		    if(pixel[0] > 35 and pixel[0] < 77):
 			green_count += 1
                 """
-
+		"""
 	    ## Visualize the detection output and save in 'detected' file##
 	    # Only show detection of traffic lights
 	    show_classes = []
@@ -168,7 +168,7 @@ c
 	
 	    cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
 	    self.number += 1
-            
+                """
 	    # Uncomment if need only red color detection
 	    print("red count:",red_count)
             if red_count > COLOR_THRESHOLD:
