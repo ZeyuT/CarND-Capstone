@@ -16,10 +16,12 @@ from scipy.spatial import KDTree
 import os
 
 STATE_COUNT_THRESHOLD = 2
+ 
+COLOR_THRESHOLD = 35
 
-COLOR_THRESHOLD = 45
+SCORE_THRESHOLD = 0.26
 
-SCORE_THRESHOLD = 0.12
+gamma = 2.2
 
 class TLDetector(object):
     def __init__(self):
@@ -90,7 +92,7 @@ class TLDetector(object):
         if self.state != state:
             self.state_count = 0
             self.state = state
-        elif (self.state_count >= STATE_COUNT_THRESHOLD and self.state == TrafficLight.RED) or self.state_count >= (STATE_COUNT_THRESHOLD+4):
+        elif (self.state_count >= STATE_COUNT_THRESHOLD and self.state == TrafficLight.RED) or self.state_count >= (STATE_COUNT_THRESHOLD+5):
 	    self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
@@ -135,7 +137,7 @@ class TLDetector(object):
         # Get classification
 	
 	# Uncomment if use red color detection
-	return self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD)
+	return self.light_classifier.get_classification(cv_image,COLOR_THRESHOLD,SCORE_THRESHOLD,gamma)
 
 	# Uncomment if use red and green color detection.
 	"""
