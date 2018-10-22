@@ -8,12 +8,11 @@ import os
 import six.moves.urllib as urllib
 from collections import defaultdict
 from io import StringIO
-from matplotlib import pyplot as plt
 from glob import glob
 import sys
 
 # Uncomment if need visualization detection
-import visualization_utils as vis_util
+# import visualization_utils as vis_util
 
 
 
@@ -54,7 +53,9 @@ class TLClassifier(object):
 	
     # Gamma transform.
     def gamma_trans(self, img, gamma):
-	hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # resize in input image to speed up saturation calculation.
+        res_img = cv2.resize(img, (120, 160))
+	hsv = cv2.cvtColor(res_img, cv2.COLOR_BGR2HSV)
 	h, w, ch = hsv.shape
  	mean_saturation = 0
 	for m in range(0,h):
