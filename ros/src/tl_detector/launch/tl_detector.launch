@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="tl_detector" type="tl_detector.py" name="tl_detector" output="screen" cwd="node"/>
+    <node pkg="tl_detector" type="tl_detector.py" name="tl_detector" output="screen" cwd="node">
+        <param name="STATE_COUNT_THRESHOLD" value="2" />
+        <param name="COLOR_THRESHOLD" value="100" />
+        <param name="SCORE_THRESHOLD" value="0.16" />
+        <param name="gamma" value="1" />    
+    </node>
 </launch>
