@@ -15,13 +15,10 @@ import time
 from scipy.spatial import KDTree
 import os
 
-STATE_COUNT_THRESHOLD = 2
- 
-COLOR_THRESHOLD = 30
-
-SCORE_THRESHOLD = 0.26
-
-gamma = 2.2
+STATE_COUNT_THRESHOLD = rospy.get_param('~STATE_COUNT_THRESHOLD', 2)
+COLOR_THRESHOLD = rospy.get_param('~COLOR_THRESHOLD', 30)
+SCORE_THRESHOLD = rospy.get_param('~SCORE_THRESHOLD', 0.26)
+gamma = rospy.get_param('~gamma', 2.2)
 
 class TLDetector(object):
     def __init__(self):
