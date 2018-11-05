@@ -95,8 +95,15 @@ class DBWNode(object):
         self.dbw_enabled = msg
 
     def twist_cb(self, msg):
-        self.linear_vel = msg.twist.linear.x
         self.angular_vel = msg.twist.angular.z
+	# Filter out abnormal massage
+	if self.linear_vel:
+	    if abs(msg.twist.linear.x - self.linear_vel) < 1.5:
+		self.linear_vel = msg.twist.linear.x
+	else:
+	    self.linear_vel = msg.twist.linear.x
+
+	#print("linear_vel:",self.linear_vel)
 
     def velocity_cb(self, msg):
         self.current_vel = msg.twist.linear.x
