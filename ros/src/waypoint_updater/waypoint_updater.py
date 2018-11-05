@@ -19,11 +19,9 @@ Once you have created dbw_node, you will update this node to use the status of t
 Please note that our simulator also provides the exact location of traffic lights and their
 current status in `/vehicle/traffic_lights` message. You can use this message to build this node
 as well as to verify your TL classifier.
-
-TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 
 MAX_DECEL = 5
 
@@ -33,13 +31,11 @@ class WaypointUpdater(object):
 
         self.base_lane = None
         self.pose = None
-        #self.base_waypoints = None
+        #self.base_waypoints = None 
         self.stopline_wp_idx = -1
         self.waypoints_2d = None
         self.waypoint_tree = None
-	
-	self.getdata = False;
-	
+	self.getdata = False
 	self.last_final_lane = None
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1)
@@ -104,7 +100,7 @@ class WaypointUpdater(object):
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
-
+	# print(closest_idx," ",self.stopline_wp_idx," ",farthest_idx)
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             lane.waypoints = base_waypoints
         else:
@@ -116,16 +112,13 @@ class WaypointUpdater(object):
     def decelerate_waypoints(self, waypoints, closest_idx):
         temp = []
         for i, wp in enumerate(waypoints):
-
             p = Waypoint()
             p.pose = wp.pose
-
-            stop_idx = max(self.stopline_wp_idx - closest_idx -5, 0) # Two waypoints back from line so front of car stops at line
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) # Two waypoints back from lines so car stops in front of line
             dist = self.distance(waypoints, i, stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
-            if vel < 1:
+            if vel < 0.5:
                 vel = 0
-
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
             temp.append(p)
         return temp
@@ -144,6 +137,7 @@ class WaypointUpdater(object):
         # Callback for /traffic_waypoint message.
         self.stopline_wp_idx = msg.data
 	self.getdata = True;
+	# print("traffic light: ",self.stopline_wp_idx)
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x
