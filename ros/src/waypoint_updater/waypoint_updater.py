@@ -22,7 +22,7 @@ as well as to verify your TL classifier.
 '''
 
 LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
-
+STOPAHEAD_WPS = 20
 MAX_DECEL = 5
 
 class WaypointUpdater(object):
@@ -37,6 +37,7 @@ class WaypointUpdater(object):
         self.waypoint_tree = None
 	self.getdata = False
 	self.last_final_lane = None
+	self.pre_closest_idx = None
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb, queue_size=1)
@@ -57,7 +58,6 @@ class WaypointUpdater(object):
         x = self.pose.pose.position.x
         y = self.pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
-
         # Check if closest is ahead or behind vehicle
         closest_coord = self.waypoints_2d[closest_idx]
         prev_coord = self.waypoints_2d[closest_idx - 1]
@@ -66,11 +66,29 @@ class WaypointUpdater(object):
         cl_vect = np.array(closest_coord)
         prev_vect = np.array(prev_coord)
         pos_vect = np.array([x, y])
-
         val = np.dot(cl_vect-prev_vect, pos_vect-cl_vect)
-
         if val > 0:
             closest_idx = (closest_idx + 1)  % len(self.waypoints_2d)
+	"""
+        dl_2d = lambda a, x, y: math.sqrt((a[0]-x)**2 + (a[1]-y)**2)
+	print("length:",len(self.waypoints_2d))
+	if not self.pre_closest_idx:
+	    closest_idx = 0
+	    temp_dis = 10000
+	    for i, waypoint_2d in enumerate(self.waypoints_2d):
+		if dl_2d(waypoint_2d, x, y) < temp_dis:
+		    temp_dis = dl_2d(waypoint_2d, x, y);
+		    closest_idx = i;
+	else:
+	    closest_idx = 0
+	    temp_dis = 10000
+	    for i in range(max(self.pre_closest_idx-20,0), min(self.pre_closest_idx+20, len(self.waypoints_2d))):
+	    	if dl_2d(self.waypoints_2d[i], x, y) < temp_dis:
+		    temp_dis = dl_2d(self.waypoints_2d[i], x, y);
+		    closest_idx = i;
+	    
+	self.pre_closest_idx = closest_idx;
+	"""
         return closest_idx
 
     """
@@ -96,15 +114,15 @@ class WaypointUpdater(object):
 
     def generate_lane(self):
         lane = Lane()
-
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
+	stop_idx = closest_idx + STOPAHEAD_WPS
+	# print(closest_idx,self.stopline_wp_idx)
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
-	# print(closest_idx," ",self.stopline_wp_idx," ",farthest_idx)
-        if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
+        if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= stop_idx):
             lane.waypoints = base_waypoints
         else:
-            rospy.loginfo("decelerating")
+            # rospy.loginfo("decelerating")
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 
         return lane
@@ -114,10 +132,13 @@ class WaypointUpdater(object):
         for i, wp in enumerate(waypoints):
             p = Waypoint()
             p.pose = wp.pose
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) # Two waypoints back from lines so car stops in front of line
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 1, 0) # one waypoints back from lines so car stops in front of line
+	    
             dist = self.distance(waypoints, i, stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
-            if vel < 0.5:
+	    if stop_idx == 1 :
+		print("stop_idx:",stop_idx,"vel:",vel,"dist:",dist)
+            if vel < 1:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
             temp.append(p)
@@ -137,7 +158,6 @@ class WaypointUpdater(object):
         # Callback for /traffic_waypoint message.
         self.stopline_wp_idx = msg.data
 	self.getdata = True;
-	# print("traffic light: ",self.stopline_wp_idx)
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x
