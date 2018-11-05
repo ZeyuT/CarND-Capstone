@@ -168,6 +168,8 @@ c
 	    cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
 	    self.number += 1
                 """
+        if not (len(idx_vec) ==0):
+	    rospy.loginfo("max score: %f red count: %d", detection_scores[max_score_idx], red_count)
 	# Uncomment if need only red color detection
         if red_count > COLOR_THRESHOLD:
             return TrafficLight.RED
