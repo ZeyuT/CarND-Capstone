@@ -182,7 +182,6 @@ class TLDetector(object):
 
         if line_wp_idx:
             state = self.get_light_state()
-	    # print("line_wp_idx:",line_wp_idx)
             return line_wp_idx, state
         
         return -1, TrafficLight.UNKNOWN
