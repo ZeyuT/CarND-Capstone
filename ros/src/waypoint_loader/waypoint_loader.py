@@ -55,11 +55,12 @@ class WaypointLoader(object):
 
                 waypoints.append(p)
 
-	    waypoints_flip = []
+	    waypoints_reverse = []
+	    print("loaded points:",len(waypoints))
 	    if (rospy.get_param('~is_site')):
 	    	for i in range(len(waypoints)):
-	            waypoints_flip.append(waypoints[len(waypoints)-1-i])
-		return self.decelerate(waypoints_flip)
+	            waypoints_reverse.append(waypoints[len(waypoints)-1-i])
+		return self.decelerate(waypoints_reverse)
             return self.decelerate(waypoints)
 
     def distance(self, p1, p2):
