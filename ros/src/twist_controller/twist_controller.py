@@ -65,7 +65,7 @@ class Controller(object):
                 decel = max(vel_error, self.decel_limit)
                 brake = min(710, (abs(decel) * self.vehicle_mass * self.wheel_radius))  # Torque N*m
                 rospy.loginfo("brake(decel): %d", brake)
-		# print("linear velocity:",linear_vel)
+		#print("linear velocity:",linear_vel,"decel:",decel)
             else:
                 rospy.loginfo("brake(none): %d", brake)
 		#print("linear velocity:",linear_vel)
