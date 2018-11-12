@@ -54,14 +54,13 @@ class WaypointLoader(object):
                 p.twist.twist.linear.x = float(self.velocity)
 
                 waypoints.append(p)
-
-	    waypoints_reverse = []
+		'''
 	    print("loaded points:",len(waypoints))
 	    if (rospy.get_param('~is_site')):
-	    	for i in range(len(waypoints)):
-	            waypoints_reverse.append(waypoints[len(waypoints)-1-i])
-		return self.decelerate(waypoints_reverse)
-            return self.decelerate(waypoints)
+		return self.decelerate(waypoints[::-1])
+        	'''    
+        return self.decelerate(waypoints)
+
 
     def distance(self, p1, p2):
         x, y, z = p1.x - p2.x, p1.y - p2.y, p1.z - p2.z
