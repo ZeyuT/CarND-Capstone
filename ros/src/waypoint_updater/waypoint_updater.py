@@ -10,19 +10,10 @@ import math
 
 '''
 This node will publish waypoints from the car's current position to some `x` distance ahead.
-
-As mentioned in the doc, you should ideally first implement a version which does not care
-about traffic lights or obstacles.
-
-Once you have created dbw_node, you will update this node to use the status of traffic lights too.
-
-Please note that our simulator also provides the exact location of traffic lights and their
-current status in `/vehicle/traffic_lights` message. You can use this message to build this node
-as well as to verify your TL classifier.
 '''
 
-LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
-STOPAHEAD_WPS = 20
+LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this number
+STOPAHEAD_WPS = 30
 MAX_DECEL = 5
 
 class WaypointUpdater(object):
@@ -116,15 +107,12 @@ class WaypointUpdater(object):
         lane = Lane()
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
-	stop_idx = closest_idx + STOPAHEAD_WPS
-	# print(closest_idx,self.stopline_wp_idx)
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
-        if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= stop_idx):
+        if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= closest_idx + STOPAHEAD_WPS):
             lane.waypoints = base_waypoints
         else:
             # rospy.loginfo("decelerating")
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
-
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
@@ -135,11 +123,10 @@ class WaypointUpdater(object):
             stop_idx = max(self.stopline_wp_idx - closest_idx - 1, 0) # one waypoints back from lines so car stops in front of line
             dist = self.distance(waypoints, i, stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
-	    #if i < stop_idx or i == stop_idx:
-		#print("stop_idx:",self.stopline_wp_idx,"vel:",vel,"dist:",dist)
             if vel < 1:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
+	    print("stop_idx:",self.stopline_wp_idx,"vel:",vel,"closest_idx:",closest_idx)
             temp.append(p)
         return temp
 
@@ -152,7 +139,6 @@ class WaypointUpdater(object):
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
-
     def traffic_cb(self, msg):
         # Callback for /traffic_waypoint message.
         self.stopline_wp_idx = msg.data
@@ -168,8 +154,11 @@ class WaypointUpdater(object):
         dist = 0
         dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
         for i in range(wp1, wp2+1):
-            dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
-            wp1 = i
+	    try:
+            	dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
+            	wp1 = i
+	    except:
+		print(i,wp1,wp2)
         return dist
 
 
