@@ -106,9 +106,7 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-	if is_site:
-	    return 58
-	elif self.waypoint_tree:
+	if self.waypoint_tree:
             closest_idx = self.waypoint_tree.query([x, y], 1)[1]
             return closest_idx
 	else:
