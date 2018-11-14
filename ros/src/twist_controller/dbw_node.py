@@ -98,7 +98,7 @@ class DBWNode(object):
         self.angular_vel = msg.twist.angular.z
 	# Filter out abnormal massage
 	if self.linear_vel:
-	    if abs(msg.twist.linear.x - self.linear_vel) < 1.5:
+	    if abs(msg.twist.linear.x - self.linear_vel) < 3:
 		self.linear_vel = msg.twist.linear.x
 	else:
 	    self.linear_vel = msg.twist.linear.x
