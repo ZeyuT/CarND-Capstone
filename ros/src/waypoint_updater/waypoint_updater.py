@@ -108,6 +108,7 @@ class WaypointUpdater(object):
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
+	#print("closest_idx:",closest_idx,"farthest_idx:",farthest_idx,"stop_idx:",self.stopline_wp_idx)
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= closest_idx + STOPAHEAD_WPS):
             lane.waypoints = base_waypoints
         else:
@@ -120,13 +121,16 @@ class WaypointUpdater(object):
         for i, wp in enumerate(waypoints):
             p = Waypoint()
             p.pose = wp.pose
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 1, 0) # one waypoints back from lines so car stops in front of line
+            stop_idx = max(self.stopline_wp_idx - closest_idx, 0) # one waypoints back from lines so car stops in front of line
             dist = self.distance(waypoints, i, stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
+	    if stop_idx == 1:
+		vel = 0
             if vel < 1:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
-	    print("stop_idx:",self.stopline_wp_idx,"vel:",vel,"closest_idx:",closest_idx)
+	    if i == 0:
+		rospy.loginfo("vel: %.2f dist:%.2f stop idx:%d",vel,dist,stop_idx)
             temp.append(p)
         return temp
 
