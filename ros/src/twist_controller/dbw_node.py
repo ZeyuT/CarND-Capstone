@@ -34,7 +34,6 @@ that we have created in the `__init__` function.
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
-
         vehicle_mass = rospy.get_param('~vehicle_mass', 1736.35)
         fuel_capacity = rospy.get_param('~fuel_capacity', 13.5)
         brake_deadband = rospy.get_param('~brake_deadband', .1)
@@ -81,6 +80,7 @@ class DBWNode(object):
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
             # Only publish the control commands if dbw is enabled
+
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                                    self.dbw_enabled,
@@ -93,17 +93,11 @@ class DBWNode(object):
             
     def dbw_enabled_cb(self, msg):
         self.dbw_enabled = msg
+	print(self.dbw_enabled)
 
     def twist_cb(self, msg):
+        self.linear_vel = msg.twist.linear.x
         self.angular_vel = msg.twist.angular.z
-	# Filter out abnormal massage
-	if self.linear_vel:
-	    if abs(msg.twist.linear.x - self.linear_vel) < 3:
-		self.linear_vel = msg.twist.linear.x
-	else:
-	    self.linear_vel = msg.twist.linear.x
-
-	#print("linear_vel:",self.linear_vel)
 
     def velocity_cb(self, msg):
         self.current_vel = msg.twist.linear.x

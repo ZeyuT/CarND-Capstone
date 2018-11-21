@@ -57,16 +57,11 @@ class Controller(object):
             brake = 0.0
             if linear_vel == 0.0 and current_vel < 0.1:
                 throttle = 0.0
-                brake = 710  # N*m - to hold the car in place if we are stopped at a light. Acceleration ~ 1m/s^2
-		rospy.loginfo("x velocity: %.2f,brake(stay): %d", linear_vel, brake)
+                brake = 720  # N*m - to hold the car in place if we are stopped at a light. Acceleration ~ 1m/s^2
             elif throttle < 0.1 and vel_error < 0:
                 throttle = 0.0
                 decel = max(vel_error, self.decel_limit)
-                brake = min(710, (abs(decel) * self.vehicle_mass * self.wheel_radius))  # Torque N*m
-                rospy.loginfo("x velocity: %.2f, brake(decel): %d", linear_vel, brake)
-		print("linear velocity:",linear_vel,"decel:",decel)
-            else:
-                rospy.loginfo("x velocity: %.2f, brake(none): %d", linear_vel, brake)
-		#print("linear velocity:",linear_vel)
+                brake = (abs(decel) * self.vehicle_mass * self.wheel_radius) # Torque N*m
+		print("brake: ",brake,"current_vel: ", current_vel)
             return throttle, brake, steering
 
