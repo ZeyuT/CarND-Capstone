@@ -1,5 +1,5 @@
 from styx_msgs.msg import TrafficLight
-import rospy
+
 import numpy as np
 import cv2
 import tensorflow as tf
@@ -115,6 +115,8 @@ c
   		if detection_scores[idx] > max_score:
 		    max_score = detection_scores[idx]
 		    max_score_idx = idx
+	    
+	    #print('max score: {}'.format(detection_scores[max_score_idx]))
 	    # Only consider the detection with score larger than SCORE_THRESHOLD
 	    if detection_scores[max_score_idx] > SCORE_THRESHOLD:
                 true_box = self.box_normal_to_pixel(detection_boxes[max_score_idx], image.shape[0:2])
@@ -168,20 +170,19 @@ c
 	    cv2.imwrite('./processed_image/{}.jpg'.format(self.number),image)
 	    self.number += 1
                 """
-        if not (len(idx_vec) ==0):
-	    rospy.loginfo("max score: %f red count: %d", detection_scores[max_score_idx], red_count)
-	# Uncomment if need only red color detection
-        if red_count > COLOR_THRESHOLD:
-            return TrafficLight.RED
-
+	    # Uncomment if need only red color detection
+	    #print("red count:",red_count)
+            if red_count > COLOR_THRESHOLD:
+                return TrafficLight.RED
+            
         return TrafficLight.UNKNOWN
 
 	# Uncomment if need red and green color detection
 	"""
  	if red_count > COLOR_THRESHOLD:
-            return TrafficLight.RED
-        elif green_count > COLOR_THRESHOLD:
+             return TrafficLight.RED
+         elif green_count > COLOR_THRESHOLD:
  	    return TrafficLight.GREEN
  	else:
-            return TrafficLight.UNKNOWN
+             return TrafficLight.UNKNOWN
 	"""
